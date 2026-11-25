@@ -178,7 +178,7 @@ ruffle-player {
   box-shadow: 0 0 15px #ffb52e, inset 0 0 12px #fff1a0;
 }
 
-/* 右侧技能键 */
+/* 右侧六个技能键 */
 .skills {
   position: relative;
   z-index: 10;
@@ -257,7 +257,6 @@ ruffle-player {
 </div>
 
 <div id="controls">
-
   <div class="direction-pad">
     <div class="dir-key dir-up" data-key="KeyW">▲</div>
     <div class="dir-key dir-down" data-key="KeyS">▼</div>
@@ -274,16 +273,13 @@ ruffle-player {
     <div class="key skill" data-key="KeyI">I</div>
     <div class="key skill" data-key="KeyO">O</div>
   </div>
-
 </div>
 
 <script>
 (function() {
-
   const container = document.getElementById("game");
 
   window.RufflePlayer = window.RufflePlayer || {};
-
   window.RufflePlayer.config = {
     autoplay: "on",
     unmuteOverlay: "hidden",
@@ -349,17 +345,6 @@ ruffle-player {
 
     player.focus();
 
-    if (down) {
-      player.dispatchEvent(new PointerEvent("pointerdown", {
-        bubbles: true,
-        cancelable: true,
-        composed: true,
-        pointerId: 1,
-        pointerType: "touch",
-        isPrimary: true
-      }));
-    }
-
     const event = new KeyboardEvent(
       down ? "keydown" : "keyup",
       {
@@ -373,7 +358,8 @@ ruffle-player {
       }
     );
 
-    player.dispatchEvent(event);
+    /* 改为派发到 window */
+    window.dispatchEvent(event);
   }
 
   function press(btn, pointerId) {
@@ -415,7 +401,6 @@ ruffle-player {
   }
 
   document.querySelectorAll("[data-key]").forEach(btn => {
-
     btn.addEventListener("pointerdown", function(e) {
       e.preventDefault();
       e.stopPropagation();
@@ -441,7 +426,6 @@ ruffle-player {
     });
 
     btn.addEventListener("contextmenu", e => e.preventDefault());
-
   });
 
   function releaseAll() {
@@ -464,7 +448,6 @@ ruffle-player {
   });
 
   document.addEventListener("contextmenu", e => e.preventDefault());
-
 })();
 </script>
 
