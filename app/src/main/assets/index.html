@@ -10,52 +10,44 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;font-f
 #stage{position:fixed;inset:0;display:flex;justify-content:center;align-items:center;background:#000}
 #game{width:100%;height:100%;display:flex;justify-content:center;align-items:center}
 ruffle-player{width:100%!important;height:100%!important}
-
-/* 控制层 */
 #controls{position:fixed;inset:0;z-index:9999;display:flex;justify-content:space-between;align-items:flex-end;padding:0 max(2vw,10px) max(2vh,10px);pointer-events:none}
 
-/* 图片式圆形方向摇杆 */
-#joystick{
+/* 风鹰侠图片式四方向键盘 */
+#direction-pad{
   position:relative;z-index:10;
   width:clamp(190px,29vw,300px);height:clamp(190px,29vw,300px);
   flex-shrink:0;margin-bottom:2vh;
-  border-radius:50%;overflow:hidden;
-  background:transparent url("wind-eagle-controller.png") center/contain no-repeat;
+  background:url("wind-eagle-controller.png") center/contain no-repeat;
+  pointer-events:auto;touch-action:none;
+}
+.dir-hit{
+  position:absolute;z-index:2;
+  background:transparent;border:0;outline:none;
   pointer-events:auto;touch-action:none;
   user-select:none;-webkit-user-select:none;
 }
-#joystick::after{
-  content:"";position:absolute;inset:0;border-radius:50%;
-  background:radial-gradient(circle,transparent 35%,rgba(80,180,255,.10) 62%,transparent 72%);
-  pointer-events:none;
-}
-#joystick.active{filter:brightness(1.18) drop-shadow(0 0 10px #42aaff)}
-#stick-dot{
-  position:absolute;left:50%;top:50%;width:23%;height:23%;
-  transform:translate(-50%,-50%);border-radius:50%;
-  border:2px solid #d9f4ff;background:radial-gradient(circle,#ffffffaa,#278bd966 65%,#082c6699);
-  box-shadow:0 0 12px #62caff;opacity:.0;pointer-events:none;
-}
-#joystick.active #stick-dot{opacity:.9}
+.dir-hit.pressed{background:rgba(65,175,255,.22);filter:drop-shadow(0 0 8px #58baff)}
+.dir-up{left:35%;top:3%;width:30%;height:31%;border-radius:45% 45% 20% 20%}
+.dir-down{left:35%;bottom:3%;width:30%;height:31%;border-radius:20% 20% 45% 45%}
+.dir-left{left:3%;top:35%;width:31%;height:30%;border-radius:45% 20% 20% 45%}
+.dir-right{right:3%;top:35%;width:31%;height:30%;border-radius:20% 45% 45% 20%}
 
-/* 右侧技能键 */
-.skills{
-  position:relative;z-index:10;pointer-events:auto;
-  display:grid;grid-template-columns:repeat(3,clamp(54px,9vw,82px));
+/* 中央徽章区域：不响应方向触控 */
+#pad-center{position:absolute;z-index:3;left:35%;top:35%;width:30%;height:30%;border-radius:50%;pointer-events:none}
+
+.skills{position:relative;z-index:10;pointer-events:auto;display:grid;
+  grid-template-columns:repeat(3,clamp(54px,9vw,82px));
   grid-template-rows:repeat(2,clamp(54px,9vw,82px));
-  gap:clamp(8px,2vw,18px);margin-bottom:5vh
-}
-.skill{
-  display:flex;justify-content:center;align-items:center;border-radius:50%;
+  gap:clamp(8px,2vw,18px);margin-bottom:5vh}
+.skill{display:flex;justify-content:center;align-items:center;border-radius:50%;
   border:3px solid #ffffff88;color:white;font-size:clamp(25px,5vw,40px);
   font-weight:900;background:linear-gradient(145deg,#173c70cc,#061329ee);
   box-shadow:0 2px 10px #0008,inset 0 0 10px #4a8bce55;
-  user-select:none;-webkit-user-select:none;pointer-events:auto;touch-action:none
-}
+  user-select:none;-webkit-user-select:none;pointer-events:auto;touch-action:none}
 .skill.pressed{background:#187edb;box-shadow:0 0 16px #168cff,inset 0 0 10px #a9e5ff}
 @media(orientation:portrait){
   #controls{padding:0 8px 18px}
-  #joystick{width:155px;height:155px;margin-bottom:1vh}
+  #direction-pad{width:155px;height:155px;margin-bottom:1vh}
   .skills{grid-template-columns:repeat(3,43px);grid-template-rows:repeat(2,43px);gap:5px;margin-bottom:2vh}
   .skill{font-size:23px;border-width:2px}
 }
@@ -64,10 +56,13 @@ ruffle-player{width:100%!important;height:100%!important}
 </head>
 <body>
 <div id="stage"><div id="game"></div></div>
-
 <div id="controls">
-  <div id="joystick" aria-label="方向摇杆">
-    <div id="stick-dot"></div>
+  <div id="direction-pad" aria-label="风鹰侠四方向键盘">
+    <div class="dir-hit dir-up" data-key="KeyW" aria-label="上"></div>
+    <div class="dir-hit dir-down" data-key="KeyS" aria-label="下"></div>
+    <div class="dir-hit dir-left" data-key="KeyA" aria-label="左"></div>
+    <div class="dir-hit dir-right" data-key="KeyD" aria-label="右"></div>
+    <div id="pad-center"></div>
   </div>
   <div class="skills">
     <div class="skill" data-key="KeyJ">J</div>
@@ -78,7 +73,6 @@ ruffle-player{width:100%!important;height:100%!important}
     <div class="skill" data-key="KeyO">O</div>
   </div>
 </div>
-
 <script>
 (function(){
   const container=document.getElementById("game");
@@ -88,20 +82,14 @@ ruffle-player{width:100%!important;height:100%!important}
     backgroundColor:"#000000",scale:"showAll",forceScale:true,
     allowScriptAccess:false,logLevel:"error",wmode:"direct",quality:"high"
   };
-
   function startGame(){
-    if(!window.RufflePlayer||!window.RufflePlayer.newest){
-      console.error("Ruffle加载失败");return;
-    }
+    if(!window.RufflePlayer||!window.RufflePlayer.newest){console.error("Ruffle加载失败");return;}
     const player=window.RufflePlayer.newest().createPlayer();
-    player.id="ruffle-player";
-    player.style.width="100%";player.style.height="100%";player.tabIndex=0;
-    container.appendChild(player);
-    window.flashPlayer=player;
+    player.id="ruffle-player";player.style.width="100%";player.style.height="100%";player.tabIndex=0;
+    container.appendChild(player);window.flashPlayer=player;
     player.load({url:"game.swf",autoplay:"on"});
   }
-  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",startGame);
-  else startGame();
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",startGame);else startGame();
 
   const keyInfo={
     KeyW:{key:"w",code:"KeyW",num:87},KeyS:{key:"s",code:"KeyS",num:83},
@@ -110,106 +98,48 @@ ruffle-player{width:100%!important;height:100%!important}
     KeyL:{key:"l",code:"KeyL",num:76},KeyU:{key:"u",code:"KeyU",num:85},
     KeyI:{key:"i",code:"KeyI",num:73},KeyO:{key:"o",code:"KeyO",num:79}
   };
-  const held=new Map();
-  const pointers=new Map();
+  const held=new Map(),pointers=new Map();
 
   function sendKey(code,down){
-    const player=window.flashPlayer||document.getElementById("ruffle-player");
-    const info=keyInfo[code];
+    const player=window.flashPlayer||document.getElementById("ruffle-player"),info=keyInfo[code];
     if(!player||!info)return;
     player.focus();
-    const event=new KeyboardEvent(down?"keydown":"keyup",{
+    player.dispatchEvent(new KeyboardEvent(down?"keydown":"keyup",{
       key:info.key,code:info.code,keyCode:info.num,which:info.num,
       bubbles:true,cancelable:true,composed:true
-    });
-    player.dispatchEvent(event);
+    }));
   }
-  function hold(code,token){
-    if(pointers.has(token))return;
-    pointers.set(token,code);
-    const count=held.get(code)||0;
-    held.set(code,count+1);
+  function press(btn,id){
+    const code=btn.dataset.key;if(pointers.has(id))return;
+    pointers.set(id,code);
+    const count=held.get(code)||0;held.set(code,count+1);
+    btn.classList.add("pressed");
     if(count===0)sendKey(code,true);
-    const button=document.querySelector('[data-key="'+code+'"]');
-    if(button)button.classList.add("pressed");
   }
-  function release(token){
-    if(!pointers.has(token))return;
-    const code=pointers.get(token);pointers.delete(token);
+  function release(id){
+    if(!pointers.has(id))return;
+    const code=pointers.get(id);pointers.delete(id);
     const count=(held.get(code)||1)-1;
     if(count<=0){
-      held.delete(code);sendKey(code,false);
-      const button=document.querySelector('[data-key="'+code+'"]');
-      if(button)button.classList.remove("pressed");
+      held.delete(code);
+      document.querySelectorAll('[data-key="'+code+'"]').forEach(el=>el.classList.remove("pressed"));
+      sendKey(code,false);
     }else held.set(code,count);
   }
-  function setJoystickKeys(nextCodes,token){
-    const previous=joystickCodes;
-    previous.forEach(code=>{if(!nextCodes.has(code))release(token+":"+code)});
-    nextCodes.forEach(code=>{if(!previous.has(code))hold(code,token+":"+code)});
-    joystickCodes=nextCodes;
-  }
-
-  /* 图片摇杆：按住并向圆盘边缘拖动，支持八方向 */
-  const joystick=document.getElementById("joystick");
-  const dot=document.getElementById("stick-dot");
-  let joystickPointer=null,joystickCodes=new Set();
-  function updateJoystick(e){
-    const rect=joystick.getBoundingClientRect();
-    const cx=rect.left+rect.width/2,cy=rect.top+rect.height/2;
-    let dx=(e.clientX-cx)/(rect.width/2);
-    let dy=(e.clientY-cy)/(rect.height/2);
-    const distance=Math.hypot(dx,dy);
-    if(distance>1){dx/=distance;dy/=distance}
-    dot.style.left=(50+dx*27)+"%";
-    dot.style.top=(50+dy*27)+"%";
-
-    const deadZone=.22,threshold=.38,next=new Set();
-    if(Math.hypot(dx,dy)>=deadZone){
-      if(dy < -threshold)next.add("KeyW");
-      if(dy > threshold)next.add("KeyS");
-      if(dx < -threshold)next.add("KeyA");
-      if(dx > threshold)next.add("KeyD");
-    }
-    setJoystickKeys(next,"joy");
-  }
-  function endJoystick(){
-    if(joystickPointer===null)return;
-    setJoystickKeys(new Set(),"joy");
-    joystickPointer=null;joystick.classList.remove("active");
-    dot.style.left="50%";dot.style.top="50%";
-  }
-  joystick.addEventListener("pointerdown",e=>{
-    e.preventDefault();joystickPointer=e.pointerId;
-    try{joystick.setPointerCapture(e.pointerId)}catch(err){}
-    joystick.classList.add("active");updateJoystick(e);
-  });
-  joystick.addEventListener("pointermove",e=>{
-    if(e.pointerId!==joystickPointer)return;
-    e.preventDefault();updateJoystick(e);
-  });
-  joystick.addEventListener("pointerup",e=>{if(e.pointerId===joystickPointer)endJoystick()});
-  joystick.addEventListener("pointercancel",endJoystick);
-  joystick.addEventListener("lostpointercapture",endJoystick);
-
-  /* 右侧技能键，支持多点触控 */
-  document.querySelectorAll(".skill[data-key]").forEach(btn=>{
+  document.querySelectorAll("[data-key]").forEach(btn=>{
     btn.addEventListener("pointerdown",e=>{
       e.preventDefault();e.stopPropagation();
       try{btn.setPointerCapture(e.pointerId)}catch(err){}
-      hold(btn.dataset.key,"skill:"+e.pointerId);
+      press(btn,e.pointerId);
     });
-    btn.addEventListener("pointerup",e=>{e.preventDefault();release("skill:"+e.pointerId)});
-    btn.addEventListener("pointercancel",e=>release("skill:"+e.pointerId));
-    btn.addEventListener("lostpointercapture",e=>release("skill:"+e.pointerId));
+    btn.addEventListener("pointerup",e=>{e.preventDefault();release(e.pointerId)});
+    btn.addEventListener("pointercancel",e=>release(e.pointerId));
+    btn.addEventListener("lostpointercapture",e=>release(e.pointerId));
     btn.addEventListener("contextmenu",e=>e.preventDefault());
   });
-
   function releaseAll(){
     Array.from(pointers.keys()).forEach(release);
-    held.clear();pointers.clear();joystickCodes.clear();
-    joystickPointer=null;joystick.classList.remove("active");
-    dot.style.left="50%";dot.style.top="50%";
+    held.clear();pointers.clear();
     document.querySelectorAll(".pressed").forEach(el=>el.classList.remove("pressed"));
   }
   window.addEventListener("blur",releaseAll);
