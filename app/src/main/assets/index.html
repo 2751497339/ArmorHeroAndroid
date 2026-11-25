@@ -1,528 +1,221 @@
-
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>铠甲勇士激斗传</title>
-
 <style>
-* {
-  box-sizing: border-box;
-  -webkit-tap-highlight-color: transparent;
-  touch-action: none;
-}
-
-html, body {
-  margin: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  background: #000;
-  font-family: Arial, sans-serif;
-}
-
-#stage {
-  position: fixed;
-  inset: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: #000;
-}
-
-#game {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-ruffle-player {
-  width: 100% !important;
-  height: 100% !important;
-}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;touch-action:none}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;font-family:Arial,sans-serif}
+#stage{position:fixed;inset:0;display:flex;justify-content:center;align-items:center;background:#000}
+#game{width:100%;height:100%;display:flex;justify-content:center;align-items:center}
+ruffle-player{width:100%!important;height:100%!important}
 
 /* 控制层 */
-#controls {
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  padding: 0 max(2vw, 10px) max(2vh, 10px);
-  pointer-events: none;
-}
+#controls{position:fixed;inset:0;z-index:9999;display:flex;justify-content:space-between;align-items:flex-end;padding:0 max(2vw,10px) max(2vh,10px);pointer-events:none}
 
-/* 金色召唤器 */
-.direction-pad {
-  position: relative;
-  z-index: 10;
-  width: clamp(190px, 28vw, 270px);
-  height: clamp(190px, 28vw, 270px);
-  flex-shrink: 0;
-  margin-bottom: 2vh;
-  border-radius: 50%;
-  border: 5px solid #b77a25;
-  background: radial-gradient(circle, #f8e4a0 0%, #c8953e 45%, #713b19 72%, #35160d 100%);
-  box-shadow: 0 0 0 3px #f4d47c, 0 0 12px #e5a638, inset 0 0 12px #fff2bd;
-  pointer-events: auto;
-  touch-action: none;
+/* 图片式圆形方向摇杆 */
+#joystick{
+  position:relative;z-index:10;
+  width:clamp(190px,29vw,300px);height:clamp(190px,29vw,300px);
+  flex-shrink:0;margin-bottom:2vh;
+  border-radius:50%;overflow:hidden;
+  background:transparent url("wind-eagle-controller.png") center/contain no-repeat;
+  pointer-events:auto;touch-action:none;
+  user-select:none;-webkit-user-select:none;
 }
-
-.direction-pad::before {
-  content: "炎龙召唤器";
-  position: absolute;
-  top: 5%;
-  left: 0;
-  width: 100%;
-  text-align: center;
-  color: #ffe5a0;
-  font-size: clamp(12px, 2vw, 18px);
-  font-weight: 900;
-  letter-spacing: 3px;
-  text-shadow: 1px 2px 2px #401708, 0 0 5px #a85a14;
-  pointer-events: none;
+#joystick::after{
+  content:"";position:absolute;inset:0;border-radius:50%;
+  background:radial-gradient(circle,transparent 35%,rgba(80,180,255,.10) 62%,transparent 72%);
+  pointer-events:none;
 }
-
-.direction-pad::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 74%;
-  height: 74%;
-  transform: translate(-50%, -50%);
-  border-radius: 24%;
-  border: 4px solid #f3d58a;
-  background: linear-gradient(135deg, #f7e6b5, #a8752c 45%, #f8e4a3 65%, #85501d);
-  box-shadow: inset 0 0 8px #fff5ce, 0 0 5px #542b0c;
-  pointer-events: none;
+#joystick.active{filter:brightness(1.18) drop-shadow(0 0 10px #42aaff)}
+#stick-dot{
+  position:absolute;left:50%;top:50%;width:23%;height:23%;
+  transform:translate(-50%,-50%);border-radius:50%;
+  border:2px solid #d9f4ff;background:radial-gradient(circle,#ffffffaa,#278bd966 65%,#082c6699);
+  box-shadow:0 0 12px #62caff;opacity:.0;pointer-events:none;
 }
-
-/* 四个方向键 */
-.dir-key {
-  position: absolute;
-  z-index: 5;
-  width: 29%;
-  height: 29%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border: 3px solid #ffe6a0;
-  border-radius: 18px;
-  color: #fff3c9;
-  font-size: clamp(28px, 5vw, 43px);
-  font-weight: 900;
-  background: linear-gradient(145deg, #b52b19, #65100c 55%, #300805);
-  box-shadow: 0 3px 5px #321405, inset 0 0 8px #ffb34c;
-  text-shadow: 0 2px 3px #360900;
-  user-select: none;
-  -webkit-user-select: none;
-  pointer-events: auto;
-  touch-action: none;
-}
-
-.dir-up {
-  left: 50%;
-  top: 8%;
-  transform: translateX(-50%);
-}
-
-.dir-down {
-  left: 50%;
-  bottom: 8%;
-  transform: translateX(-50%);
-}
-
-.dir-left {
-  left: 8%;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-.dir-right {
-  right: 8%;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-/* 中央徽章 */
-.center-emblem {
-  position: absolute;
-  z-index: 4;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 31%;
-  height: 31%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border-radius: 50%;
-  border: 4px solid #ffe6a0;
-  color: #ffe7a5;
-  font-size: clamp(24px, 4vw, 38px);
-  font-weight: 900;
-  background: radial-gradient(circle, #c62c19, #79130e 65%, #360905);
-  box-shadow: 0 0 0 3px #8e5a20, inset 0 0 8px #ffcf63, 0 0 8px #351407;
-  text-shadow: 0 2px 3px #360900;
-  pointer-events: none;
-}
-
-.dir-key.pressed {
-  background: linear-gradient(145deg, #ffcf5c, #d85a19 55%, #8d180d);
-  color: #fff;
-  box-shadow: 0 0 15px #ffb52e, inset 0 0 12px #fff1a0;
-}
+#joystick.active #stick-dot{opacity:.9}
 
 /* 右侧技能键 */
-.skills {
-  position: relative;
-  z-index: 10;
-  pointer-events: auto;
-  display: grid;
-  grid-template-columns: repeat(3, clamp(54px, 9vw, 82px));
-  grid-template-rows: repeat(2, clamp(54px, 9vw, 82px));
-  gap: clamp(8px, 2vw, 18px);
-  margin-bottom: 5vh;
+.skills{
+  position:relative;z-index:10;pointer-events:auto;
+  display:grid;grid-template-columns:repeat(3,clamp(54px,9vw,82px));
+  grid-template-rows:repeat(2,clamp(54px,9vw,82px));
+  gap:clamp(8px,2vw,18px);margin-bottom:5vh
 }
-
-.skill {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border-radius: 50%;
-  border: 3px solid #ffffff88;
-  color: white;
-  font-size: clamp(25px, 5vw, 40px);
-  font-weight: 900;
-  background: linear-gradient(145deg, #173c70cc, #061329ee);
-  box-shadow: 0 2px 10px #0008, inset 0 0 10px #4a8bce55;
-  user-select: none;
-  -webkit-user-select: none;
-  pointer-events: auto;
-  touch-action: none;
+.skill{
+  display:flex;justify-content:center;align-items:center;border-radius:50%;
+  border:3px solid #ffffff88;color:white;font-size:clamp(25px,5vw,40px);
+  font-weight:900;background:linear-gradient(145deg,#173c70cc,#061329ee);
+  box-shadow:0 2px 10px #0008,inset 0 0 10px #4a8bce55;
+  user-select:none;-webkit-user-select:none;pointer-events:auto;touch-action:none
 }
-
-.skill.pressed {
-  background: #187edb;
-  box-shadow: 0 0 16px #168cff, inset 0 0 10px #a9e5ff;
-}
-
-/* 手机竖屏 */
-@media (orientation: portrait) {
-  #controls {
-    padding: 0 8px 18px;
-  }
-
-  .direction-pad {
-    width: 155px;
-    height: 155px;
-    margin-bottom: 1vh;
-  }
-
-  .dir-key {
-    font-size: 27px;
-    border-width: 2px;
-  }
-
-  .center-emblem {
-    font-size: 23px;
-    border-width: 3px;
-  }
-
-  .skills {
-    grid-template-columns: repeat(3, 43px);
-    grid-template-rows: repeat(2, 43px);
-    gap: 5px;
-    margin-bottom: 2vh;
-  }
-
-  .skill {
-    font-size: 23px;
-    border-width: 2px;
-  }
+.skill.pressed{background:#187edb;box-shadow:0 0 16px #168cff,inset 0 0 10px #a9e5ff}
+@media(orientation:portrait){
+  #controls{padding:0 8px 18px}
+  #joystick{width:155px;height:155px;margin-bottom:1vh}
+  .skills{grid-template-columns:repeat(3,43px);grid-template-rows:repeat(2,43px);gap:5px;margin-bottom:2vh}
+  .skill{font-size:23px;border-width:2px}
 }
 </style>
-
 <script src="https://unpkg.com/@ruffle-rs/ruffle@0.8.0/ruffle.js"></script>
 </head>
-
 <body>
-
-<div id="stage">
-  <div id="game"></div>
-</div>
+<div id="stage"><div id="game"></div></div>
 
 <div id="controls">
-
-  <div class="direction-pad">
-
-    <div class="dir-key dir-up" data-key="KeyW">▲</div>
-    <div class="dir-key dir-down" data-key="KeyS">▼</div>
-    <div class="dir-key dir-left" data-key="KeyA">◀</div>
-    <div class="dir-key dir-right" data-key="KeyD">▶</div>
-
-    <div class="center-emblem">龙</div>
-
+  <div id="joystick" aria-label="方向摇杆">
+    <div id="stick-dot"></div>
   </div>
-
   <div class="skills">
-    <div class="key skill" data-key="KeyJ">J</div>
-    <div class="key skill" data-key="KeyK">K</div>
-    <div class="key skill" data-key="KeyL">L</div>
-    <div class="key skill" data-key="KeyU">U</div>
-    <div class="key skill" data-key="KeyI">I</div>
-    <div class="key skill" data-key="KeyO">O</div>
+    <div class="skill" data-key="KeyJ">J</div>
+    <div class="skill" data-key="KeyK">K</div>
+    <div class="skill" data-key="KeyL">L</div>
+    <div class="skill" data-key="KeyU">U</div>
+    <div class="skill" data-key="KeyI">I</div>
+    <div class="skill" data-key="KeyO">O</div>
   </div>
-
 </div>
 
 <script>
-(function() {
-
-  const container = document.getElementById("game");
-
-  window.RufflePlayer = window.RufflePlayer || {};
-
-  window.RufflePlayer.config = {
-    autoplay: "on",
-    unmuteOverlay: "hidden",
-    letterbox: "on",
-    backgroundColor: "#000000",
-    scale: "showAll",
-    forceScale: true,
-    allowScriptAccess: false,
-    logLevel: "error",
-    wmode: "direct",
-    quality: "high"
+(function(){
+  const container=document.getElementById("game");
+  window.RufflePlayer=window.RufflePlayer||{};
+  window.RufflePlayer.config={
+    autoplay:"on",unmuteOverlay:"hidden",letterbox:"on",
+    backgroundColor:"#000000",scale:"showAll",forceScale:true,
+    allowScriptAccess:false,logLevel:"error",wmode:"direct",quality:"high"
   };
 
-  function startGame() {
-
-    if (!window.RufflePlayer ||
-        !window.RufflePlayer.newest) {
-      console.error("Ruffle加载失败");
-      return;
+  function startGame(){
+    if(!window.RufflePlayer||!window.RufflePlayer.newest){
+      console.error("Ruffle加载失败");return;
     }
-
-    const ruffle = window.RufflePlayer.newest();
-
-    const player = ruffle.createPlayer();
-
-    player.id = "ruffle-player";
-    player.style.width = "100%";
-    player.style.height = "100%";
-    player.tabIndex = 0;
-
+    const player=window.RufflePlayer.newest().createPlayer();
+    player.id="ruffle-player";
+    player.style.width="100%";player.style.height="100%";player.tabIndex=0;
     container.appendChild(player);
-
-    window.flashPlayer = player;
-
-    player.load({
-      url: "game.swf",
-      autoplay: "on"
-    });
-
+    window.flashPlayer=player;
+    player.load({url:"game.swf",autoplay:"on"});
   }
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",startGame);
+  else startGame();
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", startGame);
-  } else {
-    startGame();
-  }
-
-  /* 按键映射 */
-
-  const keyInfo = {
-
-    KeyW: {key:"w", code:"KeyW", num:87},
-    KeyS: {key:"s", code:"KeyS", num:83},
-    KeyA: {key:"a", code:"KeyA", num:65},
-    KeyD: {key:"d", code:"KeyD", num:68},
-
-    KeyJ: {key:"j", code:"KeyJ", num:74},
-    KeyK: {key:"k", code:"KeyK", num:75},
-    KeyL: {key:"l", code:"KeyL", num:76},
-
-    KeyU: {key:"u", code:"KeyU", num:85},
-    KeyI: {key:"i", code:"KeyI", num:73},
-    KeyO: {key:"o", code:"KeyO", num:79}
-
+  const keyInfo={
+    KeyW:{key:"w",code:"KeyW",num:87},KeyS:{key:"s",code:"KeyS",num:83},
+    KeyA:{key:"a",code:"KeyA",num:65},KeyD:{key:"d",code:"KeyD",num:68},
+    KeyJ:{key:"j",code:"KeyJ",num:74},KeyK:{key:"k",code:"KeyK",num:75},
+    KeyL:{key:"l",code:"KeyL",num:76},KeyU:{key:"u",code:"KeyU",num:85},
+    KeyI:{key:"i",code:"KeyI",num:73},KeyO:{key:"o",code:"KeyO",num:79}
   };
+  const held=new Map();
+  const pointers=new Map();
 
-  const held = new Map();
-  const pointers = new Map();
-
-  /* 修复键盘事件发送 */
-
-  function sendKey(code, down) {
-
-    const player = window.flashPlayer ||
-      document.getElementById("ruffle-player");
-
-    const info = keyInfo[code];
-
-    if (!player || !info) {
-      console.warn("播放器或按键不存在:", code);
-      return;
-    }
-
+  function sendKey(code,down){
+    const player=window.flashPlayer||document.getElementById("ruffle-player");
+    const info=keyInfo[code];
+    if(!player||!info)return;
     player.focus();
-
-    const event = new KeyboardEvent(
-      down ? "keydown" : "keyup",
-      {
-        key: info.key,
-        code: info.code,
-        keyCode: info.num,
-        which: info.num,
-        bubbles: true,
-        cancelable: true,
-        composed: true,
-        repeat: false
-      }
-    );
-
-    /* 从播放器本身派发 */
-
+    const event=new KeyboardEvent(down?"keydown":"keyup",{
+      key:info.key,code:info.code,keyCode:info.num,which:info.num,
+      bubbles:true,cancelable:true,composed:true
+    });
     player.dispatchEvent(event);
-
+  }
+  function hold(code,token){
+    if(pointers.has(token))return;
+    pointers.set(token,code);
+    const count=held.get(code)||0;
+    held.set(code,count+1);
+    if(count===0)sendKey(code,true);
+    const button=document.querySelector('[data-key="'+code+'"]');
+    if(button)button.classList.add("pressed");
+  }
+  function release(token){
+    if(!pointers.has(token))return;
+    const code=pointers.get(token);pointers.delete(token);
+    const count=(held.get(code)||1)-1;
+    if(count<=0){
+      held.delete(code);sendKey(code,false);
+      const button=document.querySelector('[data-key="'+code+'"]');
+      if(button)button.classList.remove("pressed");
+    }else held.set(code,count);
+  }
+  function setJoystickKeys(nextCodes,token){
+    const previous=joystickCodes;
+    previous.forEach(code=>{if(!nextCodes.has(code))release(token+":"+code)});
+    nextCodes.forEach(code=>{if(!previous.has(code))hold(code,token+":"+code)});
+    joystickCodes=nextCodes;
   }
 
-  /* 按下按钮 */
+  /* 图片摇杆：按住并向圆盘边缘拖动，支持八方向 */
+  const joystick=document.getElementById("joystick");
+  const dot=document.getElementById("stick-dot");
+  let joystickPointer=null,joystickCodes=new Set();
+  function updateJoystick(e){
+    const rect=joystick.getBoundingClientRect();
+    const cx=rect.left+rect.width/2,cy=rect.top+rect.height/2;
+    let dx=(e.clientX-cx)/(rect.width/2);
+    let dy=(e.clientY-cy)/(rect.height/2);
+    const distance=Math.hypot(dx,dy);
+    if(distance>1){dx/=distance;dy/=distance}
+    dot.style.left=(50+dx*27)+"%";
+    dot.style.top=(50+dy*27)+"%";
 
-  function press(btn, pointerId) {
-
-    const code = btn.dataset.key;
-
-    if (pointers.has(pointerId)) return;
-
-    pointers.set(pointerId, code);
-
-    const count = held.get(code) || 0;
-
-    held.set(code, count + 1);
-
-    btn.classList.add("pressed");
-
-    if (count === 0) {
-      sendKey(code, true);
+    const deadZone=.22,threshold=.38,next=new Set();
+    if(Math.hypot(dx,dy)>=deadZone){
+      if(dy < -threshold)next.add("KeyW");
+      if(dy > threshold)next.add("KeyS");
+      if(dx < -threshold)next.add("KeyA");
+      if(dx > threshold)next.add("KeyD");
     }
-
+    setJoystickKeys(next,"joy");
   }
-
-  /* 松开按钮 */
-
-  function release(pointerId) {
-
-    if (!pointers.has(pointerId)) return;
-
-    const code = pointers.get(pointerId);
-
-    pointers.delete(pointerId);
-
-    const count = (held.get(code) || 1) - 1;
-
-    if (count <= 0) {
-
-      held.delete(code);
-
-      document.querySelectorAll(
-        '[data-key="' + code + '"]'
-      ).forEach(el => {
-        el.classList.remove("pressed");
-      });
-
-      sendKey(code, false);
-
-    } else {
-
-      held.set(code, count);
-
-    }
-
+  function endJoystick(){
+    if(joystickPointer===null)return;
+    setJoystickKeys(new Set(),"joy");
+    joystickPointer=null;joystick.classList.remove("active");
+    dot.style.left="50%";dot.style.top="50%";
   }
+  joystick.addEventListener("pointerdown",e=>{
+    e.preventDefault();joystickPointer=e.pointerId;
+    try{joystick.setPointerCapture(e.pointerId)}catch(err){}
+    joystick.classList.add("active");updateJoystick(e);
+  });
+  joystick.addEventListener("pointermove",e=>{
+    if(e.pointerId!==joystickPointer)return;
+    e.preventDefault();updateJoystick(e);
+  });
+  joystick.addEventListener("pointerup",e=>{if(e.pointerId===joystickPointer)endJoystick()});
+  joystick.addEventListener("pointercancel",endJoystick);
+  joystick.addEventListener("lostpointercapture",endJoystick);
 
-  /* 触屏事件 */
-
-  document.querySelectorAll("[data-key]").forEach(btn => {
-
-    btn.addEventListener("pointerdown", function(e) {
-
-      e.preventDefault();
-      e.stopPropagation();
-
-      try {
-        btn.setPointerCapture(e.pointerId);
-      } catch(err) {}
-
-      press(btn, e.pointerId);
-
+  /* 右侧技能键，支持多点触控 */
+  document.querySelectorAll(".skill[data-key]").forEach(btn=>{
+    btn.addEventListener("pointerdown",e=>{
+      e.preventDefault();e.stopPropagation();
+      try{btn.setPointerCapture(e.pointerId)}catch(err){}
+      hold(btn.dataset.key,"skill:"+e.pointerId);
     });
-
-    btn.addEventListener("pointerup", function(e) {
-
-      e.preventDefault();
-
-      release(e.pointerId);
-
-    });
-
-    btn.addEventListener("pointercancel", function(e) {
-
-      release(e.pointerId);
-
-    });
-
-    btn.addEventListener("lostpointercapture", function(e) {
-
-      release(e.pointerId);
-
-    });
-
-    btn.addEventListener("contextmenu", e => {
-      e.preventDefault();
-    });
-
+    btn.addEventListener("pointerup",e=>{e.preventDefault();release("skill:"+e.pointerId)});
+    btn.addEventListener("pointercancel",e=>release("skill:"+e.pointerId));
+    btn.addEventListener("lostpointercapture",e=>release("skill:"+e.pointerId));
+    btn.addEventListener("contextmenu",e=>e.preventDefault());
   });
 
-  /* 清除所有按键 */
-
-  function releaseAll() {
-
-    held.forEach((count, code) => {
-      sendKey(code, false);
-    });
-
-    held.clear();
-    pointers.clear();
-
-    document.querySelectorAll(".pressed").forEach(btn => {
-      btn.classList.remove("pressed");
-    });
-
+  function releaseAll(){
+    Array.from(pointers.keys()).forEach(release);
+    held.clear();pointers.clear();joystickCodes.clear();
+    joystickPointer=null;joystick.classList.remove("active");
+    dot.style.left="50%";dot.style.top="50%";
+    document.querySelectorAll(".pressed").forEach(el=>el.classList.remove("pressed"));
   }
-
-  window.addEventListener("blur", releaseAll);
-
-  document.addEventListener("visibilitychange", function() {
-
-    if (document.hidden) {
-      releaseAll();
-    }
-
-  });
-
-  document.addEventListener("contextmenu", e => {
-    e.preventDefault();
-  });
-
+  window.addEventListener("blur",releaseAll);
+  document.addEventListener("visibilitychange",()=>{if(document.hidden)releaseAll()});
+  document.addEventListener("contextmenu",e=>e.preventDefault());
 })();
 </script>
-
 </body>
 </html>
