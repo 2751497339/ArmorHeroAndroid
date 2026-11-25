@@ -324,17 +324,19 @@ ruffle-player {
     startGame();
   }
 
+  /* 左侧按钮映射到 WASD */
   const keyInfo = {
-    ArrowUp:    {key:"ArrowUp", code:"ArrowUp", num:38},
-    ArrowDown:  {key:"ArrowDown", code:"ArrowDown", num:40},
-    ArrowLeft:  {key:"ArrowLeft", code:"ArrowLeft", num:37},
-    ArrowRight: {key:"ArrowRight", code:"ArrowRight", num:39},
-    KeyJ:       {key:"j", code:"KeyJ", num:74},
-    KeyK:       {key:"k", code:"KeyK", num:75},
-    KeyL:       {key:"l", code:"KeyL", num:76},
-    KeyU:       {key:"u", code:"KeyU", num:85},
-    KeyI:       {key:"i", code:"KeyI", num:73},
-    KeyO:       {key:"o", code:"KeyO", num:79}
+    ArrowUp:    {key:"w", code:"KeyW", num:87},
+    ArrowDown:  {key:"s", code:"KeyS", num:83},
+    ArrowLeft:  {key:"a", code:"KeyA", num:65},
+    ArrowRight: {key:"d", code:"KeyD", num:68},
+
+    KeyJ: {key:"j", code:"KeyJ", num:74},
+    KeyK: {key:"k", code:"KeyK", num:75},
+    KeyL: {key:"l", code:"KeyL", num:76},
+    KeyU: {key:"u", code:"KeyU", num:85},
+    KeyI: {key:"i", code:"KeyI", num:73},
+    KeyO: {key:"o", code:"KeyO", num:79}
   };
 
   const held = new Map();
@@ -348,7 +350,6 @@ ruffle-player {
 
     player.focus();
 
-    // 尝试让 Ruffle 先获得指针输入焦点
     if (down) {
       player.dispatchEvent(new PointerEvent("pointerdown", {
         bubbles: true,
