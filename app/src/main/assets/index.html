@@ -149,7 +149,7 @@ ruffle-player {
   transform: translateY(-50%);
 }
 
-/* 中央徽章：装饰，不接收触摸 */
+/* 中央徽章 */
 .center-emblem {
   position: absolute;
   z-index: 4;
@@ -178,7 +178,7 @@ ruffle-player {
   box-shadow: 0 0 15px #ffb52e, inset 0 0 12px #fff1a0;
 }
 
-/* 右侧技能键 */
+/* 右侧六个技能键 */
 .skills {
   position: relative;
   z-index: 10;
@@ -257,6 +257,7 @@ ruffle-player {
 </div>
 
 <div id="controls">
+
   <div class="direction-pad">
     <div class="dir-key dir-up" data-key="ArrowUp">▲</div>
     <div class="dir-key dir-down" data-key="ArrowDown">▼</div>
@@ -273,13 +274,16 @@ ruffle-player {
     <div class="key skill" data-key="KeyI">I</div>
     <div class="key skill" data-key="KeyO">O</div>
   </div>
+
 </div>
 
 <script>
 (function() {
+
   const container = document.getElementById("game");
 
   window.RufflePlayer = window.RufflePlayer || {};
+
   window.RufflePlayer.config = {
     autoplay: "on",
     unmuteOverlay: "hidden",
@@ -339,34 +343,42 @@ ruffle-player {
   function sendKey(code, down) {
     const player = document.getElementById("ruffle-player");
     const info = keyInfo[code];
+
     if (!player || !info) return;
 
     player.focus();
 
-    const event = new KeyboardEvent(down ? "keydown" : "keyup", {
-      key: info.key,
-      code: info.code,
-      keyCode: info.num,
-      which: info.num,
-      bubbles: true,
-      cancelable: true,
-      composed: true
-    });
+    // 尝试让 Ruffle 先获得指针输入焦点
+    if (down) {
+      player.dispatchEvent(new PointerEvent("pointerdown", {
+        bubbles: true,
+        cancelable: true,
+        composed: true,
+        pointerId: 1,
+        pointerType: "touch",
+        isPrimary: true
+      }));
+    }
 
-    /* 在播放器上派发，事件也会向外冒泡 */
+    const event = new KeyboardEvent(
+      down ? "keydown" : "keyup",
+      {
+        key: info.key,
+        code: info.code,
+        keyCode: info.num,
+        which: info.num,
+        bubbles: true,
+        cancelable: true,
+        composed: true
+      }
+    );
+
     player.dispatchEvent(event);
-    window.dispatchEvent(new KeyboardEvent(down ? "keydown" : "keyup", {
-      key: info.key,
-      code: info.code,
-      keyCode: info.num,
-      which: info.num,
-      bubbles: true,
-      cancelable: true
-    }));
   }
 
   function press(btn, pointerId) {
     const code = btn.dataset.key;
+
     if (pointers.has(pointerId)) return;
 
     pointers.set(pointerId, code);
@@ -391,9 +403,11 @@ ruffle-player {
 
     if (count <= 0) {
       held.delete(code);
+
       document.querySelectorAll('[data-key="' + code + '"]').forEach(el => {
         el.classList.remove("pressed");
       });
+
       sendKey(code, false);
     } else {
       held.set(code, count);
@@ -401,6 +415,7 @@ ruffle-player {
   }
 
   document.querySelectorAll("[data-key]").forEach(btn => {
+
     btn.addEventListener("pointerdown", function(e) {
       e.preventDefault();
       e.stopPropagation();
@@ -426,10 +441,14 @@ ruffle-player {
     });
 
     btn.addEventListener("contextmenu", e => e.preventDefault());
+
   });
 
   function releaseAll() {
-    held.forEach((count, code) => sendKey(code, false));
+    held.forEach((count, code) => {
+      sendKey(code, false);
+    });
+
     held.clear();
     pointers.clear();
 
@@ -445,6 +464,7 @@ ruffle-player {
   });
 
   document.addEventListener("contextmenu", e => e.preventDefault());
+
 })();
 </script>
 
