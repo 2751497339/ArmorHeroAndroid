@@ -178,7 +178,7 @@ ruffle-player {
   box-shadow: 0 0 15px #ffb52e, inset 0 0 12px #fff1a0;
 }
 
-/* 右侧六个技能键 */
+/* 右侧技能键 */
 .skills {
   position: relative;
   z-index: 10;
@@ -259,10 +259,10 @@ ruffle-player {
 <div id="controls">
 
   <div class="direction-pad">
-    <div class="dir-key dir-up" data-key="ArrowUp">▲</div>
-    <div class="dir-key dir-down" data-key="ArrowDown">▼</div>
-    <div class="dir-key dir-left" data-key="ArrowLeft">◀</div>
-    <div class="dir-key dir-right" data-key="ArrowRight">▶</div>
+    <div class="dir-key dir-up" data-key="KeyW">▲</div>
+    <div class="dir-key dir-down" data-key="KeyS">▼</div>
+    <div class="dir-key dir-left" data-key="KeyA">◀</div>
+    <div class="dir-key dir-right" data-key="KeyD">▶</div>
     <div class="center-emblem">龙</div>
   </div>
 
@@ -324,12 +324,11 @@ ruffle-player {
     startGame();
   }
 
-  /* 左侧按钮映射到 WASD */
   const keyInfo = {
-    ArrowUp:    {key:"w", code:"KeyW", num:87},
-    ArrowDown:  {key:"s", code:"KeyS", num:83},
-    ArrowLeft:  {key:"a", code:"KeyA", num:65},
-    ArrowRight: {key:"d", code:"KeyD", num:68},
+    KeyW: {key:"w", code:"KeyW", num:87},
+    KeyS: {key:"s", code:"KeyS", num:83},
+    KeyA: {key:"a", code:"KeyA", num:65},
+    KeyD: {key:"d", code:"KeyD", num:68},
 
     KeyJ: {key:"j", code:"KeyJ", num:74},
     KeyK: {key:"k", code:"KeyK", num:75},
