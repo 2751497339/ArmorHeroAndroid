@@ -3,7 +3,8 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="viewport"
+content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 
 <title>铠甲勇士激斗传</title>
 
@@ -20,147 +21,142 @@ html, body {
   height: 100%;
   overflow: hidden;
   background: #000;
-  font-family: system-ui, sans-serif;
+  font-family: Arial, sans-serif;
 }
 
 #stage {
   position: fixed;
   inset: 0;
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   background: #000;
 }
 
 #game {
   width: 100%;
   height: 100%;
-  display: block;
-  object-fit: contain;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-/* 左侧方向控制区 */
+ruffle-player {
+  width: 100% !important;
+  height: 100% !important;
+}
+
 #controls {
   position: fixed;
-  left: max(12px, env(safe-area-inset-left));
-  bottom: max(18px, env(safe-area-inset-bottom));
+  inset: 0;
   pointer-events: none;
-  z-index: 100;
-}
-
-/* 十字方向键布局 */
-.group {
-  display: grid;
-  grid-template-columns: repeat(3, clamp(58px, 10vw, 78px));
-  grid-template-rows: repeat(3, clamp(58px, 10vw, 78px));
-  gap: 5px;
-  pointer-events: auto;
-}
-
-/* 铠甲勇士风格按键 */
-.key {
-  width: clamp(58px, 10vw, 78px);
-  height: clamp(58px, 10vw, 78px);
-
   display: flex;
-  align-items: center;
-  justify-content: center;
-
-  border: 3px solid #f1c65b;
-  border-radius: 16px;
-
-  background: linear-gradient(
-    145deg,
-    #c9362b,
-    #741313
-  );
-
-  color: #fff3c5;
-  font-size: clamp(25px, 5vw, 34px);
-  font-weight: 900;
-
-  user-select: none;
-  -webkit-user-select: none;
-
-  box-shadow:
-    0 0 10px #e8bd5488,
-    inset 0 0 12px #ffcf5555,
-    0 4px 8px #000a;
-
-  transition: transform 0.05s, background 0.05s;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 0 3vw 5vh;
 }
 
-/* 按下效果 */
+/* 左侧方向键 */
+
+.dpad {
+  pointer-events: auto;
+  display: grid;
+  grid-template-columns: repeat(3,  min(17vw, 72px));
+  grid-template-rows: repeat(3, min(17vw, 72px));
+  gap: 4px;
+  align-items: center;
+  justify-items: center;
+  margin-bottom: 2vh;
+}
+
+.key {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 2px solid #8bdcff;
+  color: white;
+  background: linear-gradient(145deg, #174e83dd, #071c39ee);
+  border-radius: 18px;
+  box-shadow:
+    0 0 8px #168cff88,
+    inset 0 0 12px #3c9fff66;
+  font-size: 30px;
+  font-weight: bold;
+  user-select: none;
+  cursor: pointer;
+}
+
 .key:active,
 .key.pressed {
-  background: linear-gradient(
-    145deg,
-    #ffcf4b,
-    #a72a19
-  );
-
-  color: #ffffff;
-  transform: scale(0.91);
-
-  box-shadow:
-    0 0 18px #ffcf4b,
-    inset 0 0 12px #fff5aa;
+  background: #00aaff;
+  box-shadow: 0 0 20px #00c8ff;
+  transform: scale(.93);
 }
 
-/* 方向键中心装饰 */
-.center {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.up {
+  grid-column: 2;
+  grid-row: 1;
+}
 
-  border: 2px solid #d5a83e;
+.left {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.right {
+  grid-column: 3;
+  grid-row: 2;
+}
+
+.down {
+  grid-column: 2;
+  grid-row: 3;
+}
+
+/* 右侧技能键 */
+
+.skills {
+  pointer-events: auto;
+  display: grid;
+  grid-template-columns: repeat(3, min(17vw, 82px));
+  grid-template-rows: repeat(2, min(17vw, 82px));
+  gap: clamp(8px, 2vw, 22px);
+  margin-bottom: 5vh;
+}
+
+.skill {
   border-radius: 50%;
-
-  background: radial-gradient(
-    circle,
-    #4c2020,
-    #160909
-  );
-
-  color: #f6ce65;
-  font-size: 25px;
-  font-weight: bold;
-  box-shadow: 0 0 10px #d8a83e88;
+  border: 3px solid #9bdcff;
+  background: linear-gradient(145deg, #155c9cdd, #061c42ee);
+  color: white;
+  font-size: clamp(25px, 5vw, 40px);
+  font-weight: 900;
+  box-shadow:
+    0 0 12px #168cff99,
+    inset 0 0 14px #4dbdff66;
 }
 
-/* 游戏提示 */
+/* 顶部提示 */
+
 #hint {
   position: fixed;
   top: 12px;
   left: 50%;
   transform: translateX(-50%);
-
   color: white;
-  background: #0009;
-
-  padding: 7px 14px;
+  background: #061c39cc;
+  border: 1px solid #58bfff;
   border-radius: 20px;
-
-  font-size: 12px;
+  padding: 7px 16px;
+  font-size: 13px;
+  white-space: nowrap;
   pointer-events: none;
-  z-index: 101;
 }
 
-/* 退出提示 */
-#exit {
-  display: none;
-  position: fixed;
-  inset: 0;
-
-  background: #000d;
-  color: white;
-
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-
-  font-size: 18px;
-  z-index: 200;
+@media (orientation: portrait) {
+  #hint {
+    top: 8px;
+  }
 }
 </style>
 
@@ -170,257 +166,183 @@ html, body {
 
 <body>
 
-<!-- 游戏画面 -->
 <div id="stage">
   <div id="game"></div>
 </div>
 
-<!-- 顶部提示 -->
 <div id="hint">
-  铠甲勇士 · 上下左右移动
+  铠甲勇士 · 方向移动 / J K L U I O 技能
 </div>
 
-<!-- 左侧四方向控制 -->
 <div id="controls">
 
-  <div class="group">
+  <!-- 左侧四方向 -->
 
-    <!-- 第一排 -->
-    <div></div>
+  <div class="dpad">
 
-    <div class="key" data-key="ArrowUp">
-      ▲
-    </div>
+    <div class="key up" data-key="ArrowUp">▲</div>
 
-    <div></div>
+    <div class="key left" data-key="ArrowLeft">◀</div>
 
-    <!-- 第二排 -->
-    <div class="key" data-key="ArrowLeft">
-      ◀
-    </div>
+    <div class="key right" data-key="ArrowRight">▶</div>
 
-    <div class="center">
-      ✦
-    </div>
-
-    <div class="key" data-key="ArrowRight">
-      ▶
-    </div>
-
-    <!-- 第三排 -->
-    <div></div>
-
-    <div class="key" data-key="ArrowDown">
-      ▼
-    </div>
-
-    <div></div>
+    <div class="key down" data-key="ArrowDown">▼</div>
 
   </div>
-</div>
 
-<!-- 退出提示 -->
-<div id="exit">
-  返回游戏
-  <br>
-  <small>再次按系统返回键退出</small>
+  <!-- 右侧六个技能键 -->
+
+  <div class="skills">
+
+    <div class="key skill" data-key="j">J</div>
+    <div class="key skill" data-key="k">K</div>
+    <div class="key skill" data-key="l">L</div>
+
+    <div class="key skill" data-key="u">U</div>
+    <div class="key skill" data-key="i">I</div>
+    <div class="key skill" data-key="o">O</div>
+
+  </div>
+
 </div>
 
 <script>
 (function() {
 
-  const container = document.getElementById('game');
+  const container = document.getElementById("game");
 
   window.RufflePlayer = window.RufflePlayer || {};
 
   window.RufflePlayer.config = {
-    autoplay: 'on',
-    unmuteOverlay: 'hidden',
-    letterbox: 'on',
-    backgroundColor: '#000000',
-    scale: 'showAll',
+    autoplay: "on",
+    unmuteOverlay: "hidden",
+    letterbox: "on",
+    backgroundColor: "#000000",
+    scale: "showAll",
     forceScale: true,
     allowScriptAccess: false,
-    logLevel: 'error',
-    wmode: 'direct',
-    quality: 'high'
+    logLevel: "error",
+    wmode: "direct",
+    quality: "high"
   };
 
-  let player = null;
-
-  // 启动 Flash 游戏
-  function start() {
+  function startGame() {
 
     if (!window.RufflePlayer ||
         !window.RufflePlayer.newest) {
       return;
     }
 
-    const r = window.RufflePlayer.newest();
+    const ruffle = window.RufflePlayer.newest();
 
-    player = r.createPlayer();
+    const player = ruffle.createPlayer();
 
-    player.id = 'ruffle-player';
+    player.id = "ruffle-player";
 
-    player.style.width = '100%';
-    player.style.height = '100%';
+    player.style.width = "100%";
+    player.style.height = "100%";
 
     container.appendChild(player);
 
     player.load({
-      url: 'game.swf',
-      autoplay: 'on'
+      url: "game.swf",
+      autoplay: "on"
     });
 
     window.flashPlayer = player;
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', start);
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", startGame);
   } else {
-    start();
+    startGame();
   }
 
-  // 方向键对应的键值
-  const keyCodes = {
-    ArrowUp: 38,
-    ArrowDown: 40,
-    ArrowLeft: 37,
-    ArrowRight: 39
-  };
+  // 键盘事件
 
-  // 记录当前按下的按键
-  const activeKeys = new Map();
+  function sendKey(key, down) {
 
-  // 向 Flash 游戏发送键盘事件
-  function send(key, down) {
+    const codeMap = {
+      ArrowUp: 38,
+      ArrowDown: 40,
+      ArrowLeft: 37,
+      ArrowRight: 39,
+      j: 74,
+      k: 75,
+      l: 76,
+      u: 85,
+      i: 73,
+      o: 79
+    };
 
-    const target = player;
-
-    if (!target) return;
-
-    if (target.focus) {
-      target.focus();
-    }
-
-    const code = keyCodes[key];
+    const code = codeMap[key];
 
     if (!code) return;
 
     const event = new KeyboardEvent(
-      down ? 'keydown' : 'keyup',
+      down ? "keydown" : "keyup",
       {
         key: key,
-        code: key,
+        code: key.startsWith("Arrow")
+          ? key
+          : "Key" + key.toUpperCase(),
         keyCode: code,
         which: code,
         bubbles: true,
-        cancelable: true,
-        composed: true
+        cancelable: true
       }
     );
 
-    target.dispatchEvent(event);
+    window.dispatchEvent(event);
   }
 
-  // 按下方向键
-  function press(key, element, pointerId) {
+  // 触摸按键控制
 
-    const id = pointerId + ':' + key;
-
-    if (activeKeys.has(id)) return;
-
-    activeKeys.set(id, {
-      key: key,
-      element: element
-    });
-
-    element.classList.add('pressed');
-
-    send(key, true);
-  }
-
-  // 松开方向键
-  function release(id) {
-
-    const item = activeKeys.get(id);
-
-    if (!item) return;
-
-    send(item.key, false);
-
-    item.element.classList.remove('pressed');
-
-    activeKeys.delete(id);
-  }
-
-  // 松开所有按键
-  function releaseAll() {
-
-    for (const id of Array.from(activeKeys.keys())) {
-      release(id);
-    }
-  }
-
-  // 绑定四个方向键
-  document.querySelectorAll('.key[data-key]').forEach(function(button) {
+  document.querySelectorAll("[data-key]").forEach(button => {
 
     const key = button.dataset.key;
 
-    button.addEventListener('pointerdown', function(e) {
-
+    function press(e) {
       e.preventDefault();
 
-      try {
-        button.setPointerCapture(e.pointerId);
-      } catch(err) {}
+      if (button.classList.contains("pressed")) return;
 
-      press(key, button, e.pointerId);
+      button.classList.add("pressed");
 
-    });
-
-    button.addEventListener('pointerup', function(e) {
-
-      e.preventDefault();
-
-      release(e.pointerId + ':' + key);
-
-    });
-
-    button.addEventListener('pointercancel', function(e) {
-
-      release(e.pointerId + ':' + key);
-
-    });
-
-    button.addEventListener('lostpointercapture', function(e) {
-
-      release(e.pointerId + ':' + key);
-
-    });
-
-    button.addEventListener('contextmenu', function(e) {
-      e.preventDefault();
-    });
-
-  });
-
-  // 切换页面或失去焦点时，自动松开按键
-  window.addEventListener('blur', releaseAll);
-
-  document.addEventListener('visibilitychange', function() {
-    if (document.hidden) {
-      releaseAll();
+      sendKey(key, true);
     }
+
+    function release(e) {
+      e.preventDefault();
+
+      button.classList.remove("pressed");
+
+      sendKey(key, false);
+    }
+
+    button.addEventListener("pointerdown", press);
+
+    button.addEventListener("pointerup", release);
+
+    button.addEventListener("pointercancel", release);
+
+    button.addEventListener("lostpointercapture", release);
+
+    button.addEventListener("contextmenu", e => {
+      e.preventDefault();
+    });
+
   });
 
-  // 阻止手机双击缩放
-  document.addEventListener('gesturestart', function(e) {
-    e.preventDefault();
-  });
+  // 页面失去焦点时释放所有按键
 
-  document.addEventListener('contextmenu', function(e) {
-    e.preventDefault();
+  window.addEventListener("blur", () => {
+
+    document.querySelectorAll(".pressed").forEach(button => {
+      sendKey(button.dataset.key, false);
+      button.classList.remove("pressed");
+    });
+
   });
 
 })();
