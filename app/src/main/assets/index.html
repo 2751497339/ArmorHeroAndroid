@@ -178,7 +178,7 @@ ruffle-player {
   box-shadow: 0 0 15px #ffb52e, inset 0 0 12px #fff1a0;
 }
 
-/* 右侧六个技能键 */
+/* 右侧技能键 */
 .skills {
   position: relative;
   z-index: 10;
@@ -212,6 +212,7 @@ ruffle-player {
   box-shadow: 0 0 16px #168cff, inset 0 0 10px #a9e5ff;
 }
 
+/* 手机竖屏 */
 @media (orientation: portrait) {
   #controls {
     padding: 0 8px 18px;
@@ -257,12 +258,16 @@ ruffle-player {
 </div>
 
 <div id="controls">
+
   <div class="direction-pad">
+
     <div class="dir-key dir-up" data-key="KeyW">▲</div>
     <div class="dir-key dir-down" data-key="KeyS">▼</div>
     <div class="dir-key dir-left" data-key="KeyA">◀</div>
     <div class="dir-key dir-right" data-key="KeyD">▶</div>
+
     <div class="center-emblem">龙</div>
+
   </div>
 
   <div class="skills">
@@ -273,13 +278,16 @@ ruffle-player {
     <div class="key skill" data-key="KeyI">I</div>
     <div class="key skill" data-key="KeyO">O</div>
   </div>
+
 </div>
 
 <script>
 (function() {
+
   const container = document.getElementById("game");
 
   window.RufflePlayer = window.RufflePlayer || {};
+
   window.RufflePlayer.config = {
     autoplay: "on",
     unmuteOverlay: "hidden",
@@ -294,9 +302,15 @@ ruffle-player {
   };
 
   function startGame() {
-    if (!window.RufflePlayer || !window.RufflePlayer.newest) return;
+
+    if (!window.RufflePlayer ||
+        !window.RufflePlayer.newest) {
+      console.error("Ruffle加载失败");
+      return;
+    }
 
     const ruffle = window.RufflePlayer.newest();
+
     const player = ruffle.createPlayer();
 
     player.id = "ruffle-player";
@@ -306,12 +320,13 @@ ruffle-player {
 
     container.appendChild(player);
 
+    window.flashPlayer = player;
+
     player.load({
       url: "game.swf",
       autoplay: "on"
     });
 
-    window.flashPlayer = player;
   }
 
   if (document.readyState === "loading") {
@@ -320,7 +335,10 @@ ruffle-player {
     startGame();
   }
 
+  /* 按键映射 */
+
   const keyInfo = {
+
     KeyW: {key:"w", code:"KeyW", num:87},
     KeyS: {key:"s", code:"KeyS", num:83},
     KeyA: {key:"a", code:"KeyA", num:65},
@@ -329,19 +347,29 @@ ruffle-player {
     KeyJ: {key:"j", code:"KeyJ", num:74},
     KeyK: {key:"k", code:"KeyK", num:75},
     KeyL: {key:"l", code:"KeyL", num:76},
+
     KeyU: {key:"u", code:"KeyU", num:85},
     KeyI: {key:"i", code:"KeyI", num:73},
     KeyO: {key:"o", code:"KeyO", num:79}
+
   };
 
   const held = new Map();
   const pointers = new Map();
 
+  /* 修复键盘事件发送 */
+
   function sendKey(code, down) {
-    const player = document.getElementById("ruffle-player");
+
+    const player = window.flashPlayer ||
+      document.getElementById("ruffle-player");
+
     const info = keyInfo[code];
 
-    if (!player || !info) return;
+    if (!player || !info) {
+      console.warn("播放器或按键不存在:", code);
+      return;
+    }
 
     player.focus();
 
@@ -354,15 +382,21 @@ ruffle-player {
         which: info.num,
         bubbles: true,
         cancelable: true,
-        composed: true
+        composed: true,
+        repeat: false
       }
     );
 
-    /* 改为派发到 window */
-    window.dispatchEvent(event);
+    /* 从播放器本身派发 */
+
+    player.dispatchEvent(event);
+
   }
 
+  /* 按下按钮 */
+
   function press(btn, pointerId) {
+
     const code = btn.dataset.key;
 
     if (pointers.has(pointerId)) return;
@@ -370,6 +404,7 @@ ruffle-player {
     pointers.set(pointerId, code);
 
     const count = held.get(code) || 0;
+
     held.set(code, count + 1);
 
     btn.classList.add("pressed");
@@ -377,31 +412,47 @@ ruffle-player {
     if (count === 0) {
       sendKey(code, true);
     }
+
   }
 
+  /* 松开按钮 */
+
   function release(pointerId) {
+
     if (!pointers.has(pointerId)) return;
 
     const code = pointers.get(pointerId);
+
     pointers.delete(pointerId);
 
     const count = (held.get(code) || 1) - 1;
 
     if (count <= 0) {
+
       held.delete(code);
 
-      document.querySelectorAll('[data-key="' + code + '"]').forEach(el => {
+      document.querySelectorAll(
+        '[data-key="' + code + '"]'
+      ).forEach(el => {
         el.classList.remove("pressed");
       });
 
       sendKey(code, false);
+
     } else {
+
       held.set(code, count);
+
     }
+
   }
 
+  /* 触屏事件 */
+
   document.querySelectorAll("[data-key]").forEach(btn => {
+
     btn.addEventListener("pointerdown", function(e) {
+
       e.preventDefault();
       e.stopPropagation();
 
@@ -410,25 +461,39 @@ ruffle-player {
       } catch(err) {}
 
       press(btn, e.pointerId);
+
     });
 
     btn.addEventListener("pointerup", function(e) {
+
       e.preventDefault();
+
       release(e.pointerId);
+
     });
 
     btn.addEventListener("pointercancel", function(e) {
+
       release(e.pointerId);
+
     });
 
     btn.addEventListener("lostpointercapture", function(e) {
+
       release(e.pointerId);
+
     });
 
-    btn.addEventListener("contextmenu", e => e.preventDefault());
+    btn.addEventListener("contextmenu", e => {
+      e.preventDefault();
+    });
+
   });
 
+  /* 清除所有按键 */
+
   function releaseAll() {
+
     held.forEach((count, code) => {
       sendKey(code, false);
     });
@@ -439,15 +504,23 @@ ruffle-player {
     document.querySelectorAll(".pressed").forEach(btn => {
       btn.classList.remove("pressed");
     });
+
   }
 
   window.addEventListener("blur", releaseAll);
 
   document.addEventListener("visibilitychange", function() {
-    if (document.hidden) releaseAll();
+
+    if (document.hidden) {
+      releaseAll();
+    }
+
   });
 
-  document.addEventListener("contextmenu", e => e.preventDefault());
+  document.addEventListener("contextmenu", e => {
+    e.preventDefault();
+  });
+
 })();
 </script>
 
