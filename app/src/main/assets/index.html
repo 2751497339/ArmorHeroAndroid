@@ -53,20 +53,30 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;font-f
    window.flashPlayer=player;
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
- function send(key,down){
-   const target=document.getElementById('ruffle-player')||document;
-   const code=key==='ArrowLeft'?37:key==='ArrowRight'?39:key==='Space'?32:17;
-   const event=new KeyboardEvent(down?'keydown':'keyup',{key:key==='Control'?'Control':key,code:key,keyCode:code,which:code,bubbles:true,cancelable:true});
-   target.dispatchEvent(event); document.dispatchEvent(event);
-   if(window.flashPlayer&&window.flashPlayer.focus)window.flashPlayer.focus();
- }
- document.querySelectorAll('.key').forEach(el=>{
-   const key=el.dataset.key;
-   el.addEventListener('pointerdown',e=>{e.preventDefault();el.setPointerCapture(e.pointerId);el.style.transform='scale(.94)';el.style.backgroundColor='#ffffff55';send(key,true)});
-   const up=e=>{e.preventDefault();el.style.transform='';el.style.backgroundColor='';send(key,false)};
-   el.addEventListener('pointerup',up);el.addEventListener('pointercancel',up);el.addEventListener('lostpointercapture',()=>{el.style.transform='';send(key,false)});
- });
- window.showExitHint=function(){document.getElementById('exit').style.display='flex'};
-})();
-</script>
-</body></html>
+ 
+function send(key,down){
+  const target=document.getElementById('ruffle-player');
+  if(!target)return;
+
+  if(target.focus)target.focus();
+
+  const code=key==='ArrowLeft'?37:
+    key==='ArrowRight'?39:
+    key==='Space'?32:17;
+
+  const event=new KeyboardEvent(
+    down?'keydown':'keyup',
+    {
+      key:key==='Control'?'Control':key,
+      code:key,
+      keyCode:code,
+      which:code,
+      bubbles:true,
+      cancelable:true,
+      composed:true
+    }
+  );
+
+  target.dispatchEvent(event);
+}
+
