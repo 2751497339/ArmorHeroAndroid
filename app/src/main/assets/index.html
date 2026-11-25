@@ -1,187 +1,350 @@
 
-<!doctype html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="utf-8">
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+
 <title>铠甲勇士激斗传</title>
 
 <style>
-*{
-  box-sizing:border-box;
-  -webkit-tap-highlight-color:transparent;
-  touch-action:none;
-}
-html,body{
-  margin:0;
-  width:100%;
-  height:100%;
-  overflow:hidden;
-  background:#000;
-  font-family:system-ui,sans-serif;
-}
-#stage{
-  position:fixed;
-  inset:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:#000;
-}
-#game{
-  width:100%;
-  height:100%;
-  display:block;
-}
-ruffle-player{
-  width:100%!important;
-  height:100%!important;
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: none;
 }
 
-/* 控制区域 */
-#controls{
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  display:flex;
-  justify-content:space-between;
-  align-items:flex-end;
-  padding:0 max(3vw,12px) max(4vh,16px);
+html, body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #000;
+  font-family: Arial, sans-serif;
 }
 
-/* 炎龙铠甲召唤器 */
-.pad{
-  width:clamp(160px,25vw,220px);
-  height:clamp(160px,25vw,220px);
-  padding:12px;
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  grid-template-rows:repeat(3,1fr);
-  gap:5px;
-  align-items:center;
-  justify-items:center;
-  border:5px solid #d8b66b;
-  border-radius:50%;
+#stage {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #000;
+}
+
+#game {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+ruffle-player {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* 游戏控制层 */
+#controls {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding:
+    0
+    max(2vw, 10px)
+    max(2vh, 10px);
+  pointer-events: none;
+}
+
+/* =========================
+   左侧：金色召唤器方向盘
+   ========================= */
+
+.direction-pad {
+  position: relative;
+  width: clamp(190px, 28vw, 270px);
+  height: clamp(190px, 28vw, 270px);
+  flex-shrink: 0;
+  margin-bottom: 2vh;
+
+  border-radius: 50%;
+  border: 5px solid #b77a25;
+
   background:
-    radial-gradient(circle,#294b70 0%,#122b4b 55%,#080e1b 100%);
+    radial-gradient(
+      circle,
+      #f8e4a0 0%,
+      #c8953e 45%,
+      #713b19 72%,
+      #35160d 100%
+    );
+
   box-shadow:
-    0 0 10px #168cff,
-    0 0 22px #0066bb99,
-    inset 0 0 18px #ffffff55;
-  pointer-events:auto;
+    0 0 0 3px #f4d47c,
+    0 0 12px #e5a638,
+    inset 0 0 12px #fff2bd;
+
+  pointer-events: auto;
 }
 
-/* 四方向键 */
-.direction{
-  width:100%;
-  height:100%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border:3px solid #f4d58a;
-  border-radius:13px;
-  color:white;
-  font-size:clamp(23px,5vw,37px);
-  font-weight:900;
+/* 外圈装饰 */
+.direction-pad::before {
+  content: "炎龙召唤器";
+  position: absolute;
+  top: 5%;
+  left: 0;
+  width: 100%;
+  text-align: center;
+
+  color: #ffe5a0;
+  font-size: clamp(12px, 2vw, 18px);
+  font-weight: 900;
+  letter-spacing: 3px;
+
+  text-shadow:
+    1px 2px 2px #401708,
+    0 0 5px #a85a14;
+}
+
+/* 十字金属底座 */
+.direction-pad::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 74%;
+  height: 74%;
+  transform: translate(-50%, -50%);
+
+  border-radius: 24%;
+  border: 4px solid #f3d58a;
+
   background:
-    linear-gradient(145deg,#ed5130,#a71912 65%,#5b0808);
+    linear-gradient(
+      135deg,
+      #f7e6b5,
+      #a8752c 45%,
+      #f8e4a3 65%,
+      #85501d
+    );
+
   box-shadow:
-    0 0 8px #ff5722,
-    inset 0 0 10px #ffc36a88;
-  user-select:none;
-  -webkit-user-select:none;
+    inset 0 0 8px #fff5ce,
+    0 0 5px #542b0c;
+
+  pointer-events: none;
 }
 
-.direction:active,
-.direction.pressed{
-  background:linear-gradient(145deg,#ffb23c,#ed3018);
-  box-shadow:0 0 20px #ff541d;
-  transform:scale(.91);
-}
+/* 四个方向键 */
+.dir-key {
+  position: absolute;
+  z-index: 3;
 
-.up{
-  grid-column:2;
-  grid-row:1;
-}
-.left{
-  grid-column:1;
-  grid-row:2;
-}
-.right-arrow{
-  grid-column:3;
-  grid-row:2;
-}
-.down{
-  grid-column:2;
-  grid-row:3;
-}
+  width: 29%;
+  height: 29%;
 
-/* 召唤器中心 */
-.core{
-  grid-column:2;
-  grid-row:2;
-  width:100%;
-  height:100%;
-  border-radius:50%;
-  border:3px solid #f5d47c;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  border: 3px solid #ffe6a0;
+  border-radius: 18px;
+
+  color: #fff3c9;
+  font-size: clamp(28px, 5vw, 43px);
+  font-weight: 900;
+
   background:
-    radial-gradient(circle,#fff4a3 0%,#ffb52e 28%,#df4018 65%,#7d100b 100%);
+    linear-gradient(
+      145deg,
+      #b52b19,
+      #65100c 55%,
+      #300805
+    );
+
   box-shadow:
-    0 0 12px #ff9d00,
-    inset 0 0 10px #fff5b0;
+    0 3px 5px #321405,
+    inset 0 0 8px #ffb34c;
+
+  text-shadow: 0 2px 3px #360900;
+
+  user-select: none;
+  -webkit-user-select: none;
 }
 
-/* 右侧六个技能键 */
-.skills{
-  display:grid;
-  grid-template-columns:repeat(3,clamp(54px,9vw,78px));
-  grid-template-rows:repeat(2,clamp(54px,9vw,78px));
-  gap:clamp(8px,2vw,16px);
-  pointer-events:auto;
+/* 上 */
+.dir-up {
+  left: 50%;
+  top: 8%;
+  transform: translateX(-50%);
 }
 
-.key{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  width:100%;
-  height:100%;
-  border:2px solid #ffffff99;
-  border-radius:50%;
-  background:#173e70bb;
-  color:white;
-  font-size:clamp(21px,4vw,30px);
-  font-weight:bold;
-  user-select:none;
-  -webkit-user-select:none;
-  box-shadow:0 2px 10px #0008;
+/* 下 */
+.dir-down {
+  left: 50%;
+  bottom: 8%;
+  transform: translateX(-50%);
 }
 
-.key:active,
-.key.pressed{
-  background:#168cff;
-  box-shadow:0 0 18px #00aaff;
-  transform:scale(.93);
+/* 左 */
+.dir-left {
+  left: 8%;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
-/* 竖屏适配 */
-@media (orientation:portrait){
-  #controls{
-    padding:0 10px 25px;
+/* 右 */
+.dir-right {
+  right: 8%;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* 中央徽章 */
+.center-emblem {
+  position: absolute;
+  z-index: 4;
+
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+
+  width: 31%;
+  height: 31%;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  border-radius: 50%;
+  border: 4px solid #ffe6a0;
+
+  color: #ffe7a5;
+  font-size: clamp(24px, 4vw, 38px);
+  font-weight: 900;
+
+  background:
+    radial-gradient(
+      circle,
+      #c62c19,
+      #79130e 65%,
+      #360905
+    );
+
+  box-shadow:
+    0 0 0 3px #8e5a20,
+    inset 0 0 8px #ffcf63,
+    0 0 8px #351407;
+
+  text-shadow:
+    0 2px 3px #360900;
+}
+
+/* 按下方向键效果 */
+.dir-key.pressed {
+  background:
+    linear-gradient(
+      145deg,
+      #ffcf5c,
+      #d85a19 55%,
+      #8d180d
+    );
+
+  color: #fff;
+  box-shadow:
+    0 0 15px #ffb52e,
+    inset 0 0 12px #fff1a0;
+}
+
+/* =========================
+   右侧：原来的六个技能键
+   ========================= */
+
+.skills {
+  pointer-events: auto;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, clamp(54px, 9vw, 82px));
+
+  grid-template-rows:
+    repeat(2, clamp(54px, 9vw, 82px));
+
+  gap: clamp(8px, 2vw, 18px);
+
+  margin-bottom: 5vh;
+}
+
+.skill {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  border-radius: 50%;
+  border: 3px solid #ffffff88;
+
+  color: white;
+  font-size: clamp(25px, 5vw, 40px);
+  font-weight: 900;
+
+  background:
+    linear-gradient(
+      145deg,
+      #173c70cc,
+      #061329ee
+    );
+
+  box-shadow:
+    0 2px 10px #0008,
+    inset 0 0 10px #4a8bce55;
+
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.skill.pressed {
+  background: #187edb;
+  box-shadow:
+    0 0 16px #168cff,
+    inset 0 0 10px #a9e5ff;
+}
+
+/* 手机竖屏时缩小控制器 */
+@media (orientation: portrait) {
+  #controls {
+    padding: 0 8px 18px;
   }
-  .pad{
-    width:135px;
-    height:135px;
-    padding:8px;
-    gap:3px;
+
+  .direction-pad {
+    width: 155px;
+    height: 155px;
+    margin-bottom: 1vh;
   }
-  .direction{
-    font-size:22px;
+
+  .dir-key {
+    font-size: 27px;
+    border-width: 2px;
   }
-  .skills{
-    grid-template-columns:repeat(3,48px);
-    grid-template-rows:repeat(2,48px);
-    gap:6px;
+
+  .center-emblem {
+    font-size: 23px;
+    border-width: 3px;
+  }
+
+  .skills {
+    grid-template-columns: repeat(3, 43px);
+    grid-template-rows: repeat(2, 43px);
+    gap: 5px;
+    margin-bottom: 2vh;
+  }
+
+  .skill {
+    font-size: 23px;
+    border-width: 2px;
   }
 }
 </style>
@@ -197,203 +360,316 @@ ruffle-player{
 
 <div id="controls">
 
-  <!-- 左侧炎龙铠甲召唤器方向键 -->
-  <div class="pad">
+  <!-- 左侧金色召唤器方向键 -->
+  <div class="direction-pad">
 
-    <div class="direction up" data-key="ArrowUp">▲</div>
+    <div class="dir-key dir-up"
+         data-key="ArrowUp">▲</div>
 
-    <div class="direction left" data-key="ArrowLeft">◀</div>
+    <div class="dir-key dir-down"
+         data-key="ArrowDown">▼</div>
 
-    <div class="core"></div>
+    <div class="dir-key dir-left"
+         data-key="ArrowLeft">◀</div>
 
-    <div class="direction right-arrow" data-key="ArrowRight">▶</div>
+    <div class="dir-key dir-right"
+         data-key="ArrowRight">▶</div>
 
-    <div class="direction down" data-key="ArrowDown">▼</div>
+    <div class="center-emblem">龙</div>
 
   </div>
 
-  <!-- 右侧技能键保持不变 -->
+  <!-- 右侧六个技能键，保持原样 -->
   <div class="skills">
 
-    <div class="key" data-key="KeyJ">J</div>
-    <div class="key" data-key="KeyK">K</div>
-    <div class="key" data-key="KeyL">L</div>
+    <div class="key skill" data-key="KeyJ">J</div>
+    <div class="key skill" data-key="KeyK">K</div>
+    <div class="key skill" data-key="KeyL">L</div>
 
-    <div class="key" data-key="KeyU">U</div>
-    <div class="key" data-key="KeyI">I</div>
-    <div class="key" data-key="KeyO">O</div>
+    <div class="key skill" data-key="KeyU">U</div>
+    <div class="key skill" data-key="KeyI">I</div>
+    <div class="key skill" data-key="KeyO">O</div>
 
   </div>
 
 </div>
 
 <script>
-(function(){
+(function() {
 
- const container=document.getElementById('game');
+  const container = document.getElementById("game");
 
- window.RufflePlayer=window.RufflePlayer||{};
+  window.RufflePlayer = window.RufflePlayer || {};
 
- window.RufflePlayer.config={
-   autoplay:'on',
-   unmuteOverlay:'hidden',
-   letterbox:'on',
-   backgroundColor:'#000000',
-   scale:'showAll',
-   forceScale:true,
-   allowScriptAccess:false,
-   logLevel:'error',
-   wmode:'direct',
-   quality:'high'
- };
+  window.RufflePlayer.config = {
+    autoplay: "on",
+    unmuteOverlay: "hidden",
+    letterbox: "on",
+    backgroundColor: "#000000",
+    scale: "showAll",
+    forceScale: true,
+    allowScriptAccess: false,
+    logLevel: "error",
+    wmode: "direct",
+    quality: "high"
+  };
 
- function start(){
-   if(!window.RufflePlayer ||
-      !window.RufflePlayer.newest)return;
+  function startGame() {
 
-   const r=window.RufflePlayer.newest();
-   const player=r.createPlayer();
+    if (!window.RufflePlayer ||
+        !window.RufflePlayer.newest) {
+      return;
+    }
 
-   player.id='ruffle-player';
-   player.style.width='100%';
-   player.style.height='100%';
+    const ruffle = window.RufflePlayer.newest();
+    const player = ruffle.createPlayer();
 
-   container.appendChild(player);
+    player.id = "ruffle-player";
 
-   player.load({
-     url:'game.swf',
-     autoplay:'on'
-   });
+    player.style.width = "100%";
+    player.style.height = "100%";
 
-   window.flashPlayer=player;
- }
+    /* 让游戏播放器可以获得焦点 */
+    player.tabIndex = 0;
 
- if(document.readyState==='loading'){
-   document.addEventListener('DOMContentLoaded',start);
- }else{
-   start();
- }
+    container.appendChild(player);
 
- // 所有按键映射
- const keyInfo={
-   ArrowUp:{key:'ArrowUp',code:'ArrowUp',num:38},
-   ArrowDown:{key:'ArrowDown',code:'ArrowDown',num:40},
-   ArrowLeft:{key:'ArrowLeft',code:'ArrowLeft',num:37},
-   ArrowRight:{key:'ArrowRight',code:'ArrowRight',num:39},
+    player.load({
+      url: "game.swf",
+      autoplay: "on"
+    });
 
-   KeyJ:{key:'j',code:'KeyJ',num:74},
-   KeyK:{key:'k',code:'KeyK',num:75},
-   KeyL:{key:'l',code:'KeyL',num:76},
-   KeyU:{key:'u',code:'KeyU',num:85},
-   KeyI:{key:'i',code:'KeyI',num:73},
-   KeyO:{key:'o',code:'KeyO',num:79}
- };
+    window.flashPlayer = player;
+  }
 
- const held=new Map();
- const pointers=new Map();
+  if (document.readyState === "loading") {
+    document.addEventListener(
+      "DOMContentLoaded",
+      startGame
+    );
+  } else {
+    startGame();
+  }
 
- // 发送键盘事件
- function send(code,down){
+  /* =========================
+     按键对应关系
+     ========================= */
 
-   const target=document.getElementById('ruffle-player');
-   if(!target)return;
+  const keyInfo = {
 
-   const info=keyInfo[code];
-   if(!info)return;
+    ArrowUp: {
+      key: "ArrowUp",
+      code: "ArrowUp",
+      num: 38
+    },
 
-   if(target.focus)target.focus();
+    ArrowDown: {
+      key: "ArrowDown",
+      code: "ArrowDown",
+      num: 40
+    },
 
-   const event=new KeyboardEvent(
-     down?'keydown':'keyup',
-     {
-       key:info.key,
-       code:info.code,
-       keyCode:info.num,
-       which:info.num,
-       bubbles:true,
-       cancelable:true,
-       composed:true
-     }
-   );
+    ArrowLeft: {
+      key: "ArrowLeft",
+      code: "ArrowLeft",
+      num: 37
+    },
 
-   target.dispatchEvent(event);
- }
+    ArrowRight: {
+      key: "ArrowRight",
+      code: "ArrowRight",
+      num: 39
+    },
 
- // 多指触控
- document.querySelectorAll('[data-key]').forEach(btn=>{
+    KeyJ: {
+      key: "j",
+      code: "KeyJ",
+      num: 74
+    },
 
-   const code=btn.dataset.key;
+    KeyK: {
+      key: "k",
+      code: "KeyK",
+      num: 75
+    },
 
-   btn.addEventListener('pointerdown',e=>{
+    KeyL: {
+      key: "l",
+      code: "KeyL",
+      num: 76
+    },
 
-     e.preventDefault();
+    KeyU: {
+      key: "u",
+      code: "KeyU",
+      num: 85
+    },
 
-     if(pointers.has(e.pointerId))return;
+    KeyI: {
+      key: "i",
+      code: "KeyI",
+      num: 73
+    },
 
-     try{
-       btn.setPointerCapture(e.pointerId);
-     }catch(err){}
+    KeyO: {
+      key: "o",
+      code: "KeyO",
+      num: 79
+    }
 
-     pointers.set(e.pointerId,code);
+  };
 
-     const count=held.get(code)||0;
-     held.set(code,count+1);
+  const held = new Map();
+  const pointers = new Map();
 
-     if(count===0){
-       btn.classList.add('pressed');
-       send(code,true);
-     }
+  /* =========================
+     发送键盘事件到游戏窗口
+     ========================= */
 
-   });
+  function sendKey(code, down) {
 
-   function release(e){
+    const player =
+      document.getElementById("ruffle-player");
 
-     if(!pointers.has(e.pointerId))return;
+    const info = keyInfo[code];
 
-     const pressed=pointers.get(e.pointerId);
-     pointers.delete(e.pointerId);
+    if (!player || !info) return;
 
-     const count=(held.get(pressed)||1)-1;
+    /* 让 Ruffle 获取焦点 */
+    if (player.focus) {
+      player.focus();
+    }
 
-     if(count<=0){
-       held.delete(pressed);
-       send(pressed,false);
+    const event = new KeyboardEvent(
+      down ? "keydown" : "keyup",
+      {
+        key: info.key,
+        code: info.code,
+        keyCode: info.num,
+        which: info.num,
+        bubbles: true,
+        cancelable: true,
+        composed: true
+      }
+    );
 
-       document.querySelectorAll('[data-key="'+pressed+'"]').forEach(b=>{
-         b.classList.remove('pressed');
-       });
+    /*
+      关键修正：
+      将键盘事件发送到 window，
+      让游戏窗口能接收到方向键和技能键。
+    */
+    window.dispatchEvent(event);
+  }
 
-     }else{
-       held.set(pressed,count);
-     }
-   }
+  /* =========================
+     触摸控制
+     支持多指同时按键
+     ========================= */
 
-   btn.addEventListener('pointerup',release);
-   btn.addEventListener('pointercancel',release);
-   btn.addEventListener('lostpointercapture',release);
+  document.querySelectorAll("[data-key]").forEach(btn => {
 
- });
+    const code = btn.dataset.key;
 
- // 失去焦点时释放所有按键
- function releaseAll(){
+    btn.addEventListener("pointerdown", function(e) {
 
-   held.forEach((count,code)=>{
-     send(code,false);
-   });
+      e.preventDefault();
 
-   held.clear();
-   pointers.clear();
+      if (pointers.has(e.pointerId)) {
+        return;
+      }
 
-   document.querySelectorAll('.pressed').forEach(btn=>{
-     btn.classList.remove('pressed');
-   });
- }
+      try {
+        btn.setPointerCapture(e.pointerId);
+      } catch(err) {}
 
- window.addEventListener('blur',releaseAll);
+      pointers.set(e.pointerId, code);
 
- document.addEventListener('contextmenu',e=>{
-   e.preventDefault();
- });
+      const count = held.get(code) || 0;
+
+      held.set(code, count + 1);
+
+      if (count === 0) {
+        btn.classList.add("pressed");
+        sendKey(code, true);
+      }
+
+    });
+
+    function release(e) {
+
+      if (!pointers.has(e.pointerId)) {
+        return;
+      }
+
+      const pressed = pointers.get(e.pointerId);
+
+      pointers.delete(e.pointerId);
+
+      const count =
+        (held.get(pressed) || 1) - 1;
+
+      if (count <= 0) {
+
+        held.delete(pressed);
+
+        document
+          .querySelectorAll('[data-key="' + pressed + '"]')
+          .forEach(el => {
+            el.classList.remove("pressed");
+          });
+
+        sendKey(pressed, false);
+
+      } else {
+
+        held.set(pressed, count);
+
+      }
+
+    }
+
+    btn.addEventListener("pointerup", release);
+    btn.addEventListener("pointercancel", release);
+    btn.addEventListener("lostpointercapture", release);
+
+    btn.addEventListener("contextmenu", function(e) {
+      e.preventDefault();
+    });
+
+  });
+
+  /* =========================
+     失去焦点时释放所有按键
+     ========================= */
+
+  function releaseAll() {
+
+    held.forEach((count, code) => {
+      sendKey(code, false);
+    });
+
+    held.clear();
+    pointers.clear();
+
+    document
+      .querySelectorAll(".pressed")
+      .forEach(btn => {
+        btn.classList.remove("pressed");
+      });
+
+  }
+
+  window.addEventListener("blur", releaseAll);
+
+  document.addEventListener("visibilitychange", function() {
+    if (document.hidden) {
+      releaseAll();
+    }
+  });
+
+  document.addEventListener("contextmenu", function(e) {
+    e.preventDefault();
+  });
 
 })();
 </script>
