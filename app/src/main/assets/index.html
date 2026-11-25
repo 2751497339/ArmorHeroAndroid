@@ -674,5 +674,26 @@ ruffle-player {
 })();
 </script>
 
+/* 左侧方向键触摸修复 */
+.direction-pad {
+  position: relative !important;
+  z-index: 100 !important;
+  pointer-events: auto !important;
+  touch-action: none !important;
+}
+
+.direction-pad::before,
+.direction-pad::after {
+  pointer-events: none !important;
+}
+
+.dir-key {
+  position: absolute !important;
+  z-index: 110 !important;
+  pointer-events: auto !important;
+  touch-action: none !important;
+  cursor: pointer;
+}
+
 </body>
 </html>
